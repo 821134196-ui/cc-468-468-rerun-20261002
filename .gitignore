@@ -13,3 +13,10 @@ build/
 轨迹/
 录屏/
 视频/
+
+# 本地运行数据
+data/*.db
+data/*.db-wal
+data/*.db-shm
+photos/*
+!photos/.gitkeep

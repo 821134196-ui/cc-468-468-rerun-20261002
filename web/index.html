@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>社区地下车库防汛挡板部署与归位系统</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">🌊</span>
+    <div>
+      <h1>防汛挡板部署与归位</h1>
+      <span class="sub">社区地下车库 · 器材全流程管理</span>
+    </div>
+  </div>
+  <div class="identity">
+    <label>演示身份</label>
+    <select id="identity"></select>
+  </div>
+</header>
+
+<div id="alert-banner" class="alert-banner hidden"></div>
+
+<nav class="tabs" id="tabs">
+  <button data-view="dashboard" class="active">预警看板</button>
+  <button data-view="schematic">入口示意图</button>
+  <button data-view="equipment">器材领用</button>
+  <button data-view="install">分段安装</button>
+  <button data-view="water">积水观察</button>
+  <button data-view="return">拆除·清洗·归架</button>
+</nav>
+
+<main>
+  <!-- 看板 -->
+  <section id="view-dashboard" class="view">
+    <div class="stat-row" id="stat-row"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h2>雨量趋势</h2><span id="rain-phase" class="tag"></span></div>
+        <div id="rain-chart" class="chart"></div>
+        <p class="hint">单位 mm（模拟适配器，每 3 秒刷新）；线形仅展示雨量，不遮挡任务信息。</p>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2>在途任务</h2></div>
+        <div id="task-list" class="task-list"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>未闭异常与待办</h2></div>
+      <div id="incident-list"></div>
+    </div>
+  </section>
+
+  <!-- 入口示意图 -->
+  <section id="view-schematic" class="view hidden">
+    <div id="schematic-list"></div>
+  </section>
+
+  <!-- 器材领用 -->
+  <section id="view-equipment" class="view hidden">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h2>部署清单与领件</h2></div>
+        <div class="row"><select id="claim-task"></select>
+          <button class="btn primary" id="btn-claim-all">整单领取</button></div>
+        <div id="checklist"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2>库存器材</h2>
+          <select id="eq-filter">
+            <option value="">全部</option>
+            <option value="panel">挡板</option>
+            <option value="post">立柱</option>
+            <option value="seal">密封条</option>
+          </select>
+        </div>
+        <div class="table-wrap"><table id="eq-table">
+          <thead><tr><th>编号</th><th>类型</th><th>存放架</th><th>状态</th><th>占用入口</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 分段安装（移动端优先） -->
+  <section id="view-install" class="view hidden">
+    <div class="install-head sticky-inside">
+      <select id="install-task"></select>
+      <button class="btn guard" id="btn-control">封控通道</button>
+      <button class="btn warn" id="btn-pass">临时放行</button>
+      <button class="btn primary big" id="btn-deploy">✓ 完成部署</button>
+    </div>
+    <div id="install-status" class="install-status"></div>
+    <div id="post-strip" class="post-strip"></div>
+    <div id="slots"></div>
+    <div id="install-photos" class="photo-strip"></div>
+    <div class="spacer-dock"></div>
+    <div class="photo-dock">
+      <label class="cam-btn">
+        <input type="file" id="cam-input" accept="image/*" capture="environment" hidden>
+        <span class="cam-ico">📷</span><span>现场拍照</span>
+      </label>
+      <select id="cam-stage">
+        <option value="install">安装照片</option>
+        <option value="control">封控照片</option>
+        <option value="general">其他</option>
+      </select>
+      <select id="cam-slot"><option value="">整体照片</option></select>
+    </div>
+  </section>
+
+  <!-- 积水观察 -->
+  <section id="view-water" class="view hidden">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h2>入口水位与人工观察</h2></div>
+        <div id="water-entrances"></div>
+        <div class="observe-form">
+          <select id="obs-entrance"></select>
+          <input id="obs-level" type="number" step="0.1" placeholder="水位 cm">
+          <input id="obs-note" placeholder="情况说明（选填）">
+          <button class="btn primary" id="btn-observe">提交观察</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2>演示天气控制</h2></div>
+        <p class="hint">模拟适配器默认按暴雨过程线自动推进，也可手动指定读数观察阈值反应。</p>
+        <div class="row">
+          <input id="wx-rain" type="number" step="0.1" placeholder="雨量 mm">
+          <button class="btn" id="btn-wx-set">设定雨量</button>
+          <button class="btn" id="btn-wx-resume">恢复自动</button>
+        </div>
+        <div class="card-h" style="margin-top:14px"><h2>人员到场</h2></div>
+        <div id="crew-list"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>积水 / 通行异常</h2></div>
+      <div id="water-incidents"></div>
+    </div>
+  </section>
+
+  <!-- 拆除·清洗·归架 -->
+  <section id="view-return" class="view hidden">
+    <div class="card">
+      <div class="card-h"><h2>拆除与归架流程</h2>
+        <select id="return-task"></select></div>
+      <div id="return-flow"></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h2>逐件归架核对</h2></div>
+        <div id="return-items" class="return-items"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2>缺件 / 报损补充单</h2></div>
+        <div id="supply-list"></div>
+        <p class="hint">缺件与破损须由物业主管审批，补充入库后器材重新可用。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast-wrap"></div>
+<div id="modal" class="modal hidden"><div class="modal-card">
+  <h3 id="modal-title"></h3><div id="modal-body"></div>
+  <div class="modal-actions">
+    <button class="btn" id="modal-cancel">取消</button>
+    <button class="btn primary" id="modal-ok">确定</button>
+  </div>
+</div></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
